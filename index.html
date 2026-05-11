@@ -376,10 +376,11 @@ RULES:
    - Follow-up date and time (insert in PLAN if not provided)
    - Patient teaching provided — what specifically was taught (insert in PLAN)
    - Return precautions — what patient was told to watch for (insert in PLAN)
-7. Do not invent findings, medications, doses, or labs not mentioned.
-8. If a consult is noted, include physician name, time, and orders as documented.
-9. Output only the note. No preamble, no explanation.
-10. Format section labels as: SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN on their own lines in caps.
+7. Do not invent findings, medications, doses, or labs not mentioned. However, every clinical detail provided in the notes must appear somewhere in the generated note — redundancy is preferred over omission. If uncertain where a detail belongs, include it in the most logical section and also reference it where clinically relevant.
+8. Any interventions, medications administered, or treatments provided during the encounter must be documented within the objective section as part of the narrative flow, not appended at the end. Integrate them chronologically where they occurred — for example, naloxone administration belongs within the resuscitation narrative alongside the clinical response, not after the systems review.
+9. If a consult is noted, include physician name, time, and orders as documented.
+10. Output only the note. No preamble, no explanation.
+11. Format section labels as: SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN on their own lines in caps.
 
 WNL BASELINES:
 General impression: ${WNL.general}
