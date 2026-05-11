@@ -536,6 +536,7 @@ function resetChecks() {
 
 buildChecklist();
 
+function copyOutput() {
   const text = document.getElementById('outputBox').textContent;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.copy-btn');
