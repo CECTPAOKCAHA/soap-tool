@@ -5,433 +5,373 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SOAP Note Generator</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --border: #e2e0d8;
-    --border-strong: #c8c5bc;
-    --text: #1a1917;
-    --text-muted: #6b6860;
-    --text-faint: #9e9c97;
-    --accent: #185FA5;
-    --accent-bg: #e6f1fb;
-    --prompt-color: #185FA5;
-    --success: #1D9E75;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --mono: 'Courier New', Courier, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  }
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #dedad0;
+  --border-strong: #b8b4a8;
+  --text: #1c1b18;
+  --text-muted: #6b6860;
+  --text-faint: #a0998e;
+  --accent: #2c5f8a;
+  --accent-light: #e8f0f8;
+  --prompt: #1a5fa5;
+  --success: #1a7a55;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --mono: 'Courier New', Courier, monospace;
+  --ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 2rem 1rem;
-  }
+body {
+  font-family: var(--ui);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2.5rem 1rem 4rem;
+}
 
-  .page {
-    max-width: 740px;
-    margin: 0 auto;
-  }
+.page { max-width: 760px; margin: 0 auto; }
 
-  header {
-    margin-bottom: 2rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border);
-  }
+.header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.header-top { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 6px; }
+.header h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+.header-sub { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); }
+.header p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
 
-  header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
+.api-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px; margin-bottom: 1.5rem; }
+.api-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); white-space: nowrap; }
+.api-row input { flex: 1; font-family: var(--mono); font-size: 12px; border: none; outline: none; background: transparent; color: var(--text); min-width: 0; }
+.api-row input::placeholder { color: var(--text-faint); }
+.btn-ghost { font-family: var(--ui); font-size: 12px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.btn-ghost:hover { background: var(--surface2); }
+.key-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; transition: background 0.2s; }
+.key-dot.ok { background: var(--success); }
 
-  header p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    line-height: 1.6;
-  }
+.field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; }
 
-  .api-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 12px;
-  }
+.template-row { display: flex; gap: 8px; margin-bottom: 1.25rem; }
+.template-opt { flex: 1; position: relative; }
+.template-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.template-opt label { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); transition: all 0.15s; user-select: none; }
+.template-opt input:checked + label { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.template-opt label:hover { border-color: var(--border-strong); color: var(--text); }
 
-  .api-row label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
+textarea { width: 100%; font-family: var(--mono); font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; resize: vertical; min-height: 220px; line-height: 1.7; transition: border-color 0.15s; }
+textarea:focus { outline: none; border-color: var(--border-strong); }
+textarea::placeholder { color: var(--text-faint); font-family: var(--ui); font-size: 13px; }
 
-  .api-row input {
-    flex: 1;
-    font-family: var(--mono);
-    font-size: 13px;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--text);
-  }
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 
-  .api-row input::placeholder { color: var(--text-faint); }
+.actions { display: flex; gap: 8px; margin-top: 1rem; align-items: center; }
+.btn { font-family: var(--ui); font-size: 13px; font-weight: 500; padding: 9px 20px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border-strong); background: transparent; color: var(--text); transition: background 0.15s; }
+.btn:hover { background: var(--surface2); }
+.btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary:hover { opacity: 0.82; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .toggle-key {
-    font-size: 12px;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .toggle-key:hover { background: var(--bg); }
+.output-section { margin-top: 2rem; }
+.output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.output-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; font-size: 13.5px; line-height: 1.95; color: var(--text); white-space: pre-wrap; min-height: 100px; }
+.output-box.loading { color: var(--text-faint); font-style: italic; }
+.prompt-tag { color: var(--prompt); font-weight: 600; }
+.section-head { font-weight: 700; letter-spacing: 0.06em; font-size: 12px; }
+.notice { font-size: 11.5px; color: var(--text-faint); margin-top: 8px; line-height: 1.6; }
+.btn-copy { font-size: 12px; padding: 5px 12px; }
 
-  .field-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 6px;
-  }
+.checklist-section { margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+.checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 1rem; }
+.checklist-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); padding: 4px 0; cursor: pointer; user-select: none; }
+.checklist-item input[type="checkbox"] { accent-color: var(--success); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }
+.checklist-item.checked { color: var(--text-faint); text-decoration: line-through; }
+.btn-reset { font-size: 11px; color: var(--text-faint); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.btn-reset:hover { color: var(--text-muted); }
 
-  textarea {
-    width: 100%;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    resize: vertical;
-    min-height: 240px;
-    line-height: 1.7;
-    transition: border-color 0.15s;
-  }
-
-  textarea:focus {
-    outline: none;
-    border-color: var(--border-strong);
-  }
-
-  textarea::placeholder {
-    color: var(--text-faint);
-    font-family: var(--sans);
-  }
-
-  .actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 1rem;
-  }
-
-  button {
-    font-family: var(--sans);
-    font-size: 14px;
-    padding: 9px 18px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    border: 1px solid var(--border-strong);
-    background: transparent;
-    color: var(--text);
-    transition: background 0.15s;
-  }
-
-  button:hover { background: var(--bg); }
-
-  button.primary {
-    background: var(--text);
-    color: #fff;
-    border-color: var(--text);
-  }
-
-  button.primary:hover { opacity: 0.85; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 1.5rem 0;
-  }
-
-  .output-section { margin-top: 2rem; }
-
-  .output-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .output-header .field-label { margin-bottom: 0; }
-
-  .output-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    font-size: 14px;
-    line-height: 2;
-    color: var(--text);
-    white-space: pre-wrap;
-    min-height: 100px;
-  }
-
-  .output-box.loading {
-    color: var(--text-faint);
-    font-style: italic;
-  }
-
-  .prompt { color: var(--prompt-color); font-weight: 500; }
-
-  .section-header {
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    display: block;
-  }
-
-  .copy-btn {
-    font-size: 13px;
-    padding: 5px 12px;
-  }
-
-  .notice {
-    font-size: 12px;
-    color: var(--text-faint);
-    margin-top: 10px;
-    line-height: 1.5;
-  }
-
-  .checklist {
-    margin-top: 1.25rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-  }
-
-  .checklist-title {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-
-  .checklist-items {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 16px;
-  }
-
-  .checklist-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .checklist-item input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-    accent-color: var(--success);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .checklist-item.checked {
-    color: var(--text-faint);
-    text-decoration: line-through;
-  }
-
-  .reset-checks {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--text-faint);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  .reset-checks:hover { color: var(--text-muted); background: none; }
-
-  .status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--border-strong);
-    margin-right: 6px;
-    vertical-align: middle;
-  }
-  .status-dot.ok { background: var(--success); }
+@media (max-width: 500px) {
+  .checklist-grid { grid-template-columns: 1fr; }
+  .template-row { flex-direction: column; }
+}
 </style>
 </head>
 <body>
 <div class="page">
 
-  <header>
-    <h1>SOAP Note Generator</h1>
-    <p>Jot raw clinical notes — patient report, findings, labs, plan. Full SOAP note generated. Missing elements flagged as <span style="color:var(--prompt-color); font-weight:500">[inline prompts]</span>. Review before copying into Meditech.</p>
-  </header>
-
-  <div class="api-row">
-    <label>API Key</label>
-    <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" oninput="checkKey()" />
-    <button class="toggle-key" onclick="toggleKey()">show</button>
-    <span class="status-dot" id="keyDot"></span>
+  <div class="header">
+    <div class="header-top">
+      <h1>SOAP Note Generator</h1>
+      <span class="header-sub">Nunavut CHN</span>
+    </div>
+    <p>Paste raw clinical notes or Heidi output. Select template. All documented findings will be included — missing standard elements appear as <span style="color:var(--prompt);font-weight:600">[inline prompts]</span> to complete before copying into Meditech.</p>
   </div>
 
-  <div class="field-label">Clinical notes</div>
-  <textarea id="rawNotes" placeholder="e.g.
-40 yo M diffuse abdo pain x2 weeks, 3-4/10
-blood in stool yesterday, ~1 cup, fresh/bright, after hard stool, resolved
-nausea, no vomiting, pale, weak, did not eat today
-hx h.pylori, iron def anemia, smoker, nkda, no meds
-assessed at 1615
-no cardiac sx, no UTI sx
-abdo soft, tender RUQ and LLQ, bs x4
-rectal exam normal
-bloods drawn at 1619 — cbc, renal, iron studies, lfts, lipase
-diff dx: rectal bleed nyd, abdo pain nyd, ?constipation, iron def anemia, ?IBS
-consulted dr anani at 1634 — urgent scope request, rx tylenol + peg 17g, push fluids, f/u monday 0945 CHN bloodwork review"></textarea>
+  <div class="api-row">
+    <span class="api-label">API Key</span>
+    <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off" oninput="checkKey()" />
+    <button class="btn-ghost" onclick="toggleKey(this)">show</button>
+    <span class="key-dot" id="keyDot"></span>
+  </div>
+
+  <div class="field-label">Patient template</div>
+  <div class="template-row">
+    <div class="template-opt">
+      <input type="radio" name="template" id="tpl-adult" value="adult" checked />
+      <label for="tpl-adult">&#129489; Adult</label>
+    </div>
+    <div class="template-opt">
+      <input type="radio" name="template" id="tpl-paeds" value="paeds" />
+      <label for="tpl-paeds">&#128118; Paediatric / Infant</label>
+    </div>
+  </div>
+
+  <div class="field-label" style="margin-top:1rem">Clinical notes</div>
+  <textarea id="rawNotes" placeholder="Paste raw jot notes or Heidi transcript output here. Include findings, patient report, labs ordered, plan, consult details, medications given — anything from the encounter."></textarea>
 
   <hr class="divider">
 
   <div class="actions">
-    <button class="primary" id="generateBtn" onclick="generateNote()">Generate SOAP note</button>
-    <button onclick="clearAll()">Clear</button>
+    <button class="btn btn-primary" id="generateBtn" onclick="generateNote()">Generate SOAP note</button>
+    <button class="btn" onclick="clearAll()">Clear</button>
   </div>
 
   <div class="output-section" id="outputSection" style="display:none">
     <div class="output-header">
       <div class="field-label">Generated note — review before copying into Meditech</div>
-      <button class="copy-btn" onclick="copyOutput()">&#10064; Copy plain text</button>
+      <button class="btn btn-copy" onclick="copyOutput()">&#10064; Copy plain text</button>
     </div>
     <div class="output-box" id="outputBox"></div>
-    <p class="notice">Blue text = elements to complete. Assessment section intentionally left for your clinical judgment.</p>
+    <p class="notice">Blue bold text = placeholders to complete before copying. Assessment left for your clinical judgment. Redundancy in the note is intentional — omission is never preferred.</p>
+  </div>
 
-    <div class="checklist" id="checklist">
-      <div class="checklist-title">Before copying into Meditech — verify</div>
-      <div class="checklist-items" id="checklistItems"></div>
-      <button class="reset-checks" onclick="resetChecks()">reset</button>
+  <div class="checklist-section" id="checklistSection" style="display:none">
+    <div class="checklist-header">
+      <div class="field-label" style="margin-bottom:0">Before copying into Meditech</div>
+      <button class="btn-reset" onclick="resetChecklist()">reset</button>
     </div>
+    <div class="checklist-grid" id="checklistGrid"></div>
   </div>
 
 </div>
-
 <script>
 const WNL = {
   general: "Patient ambulatory, alert and oriented x4, dressed appropriately for the season, speaking in full sentences, no acute distress.",
-  neuro: "Alert and oriented x4, speech clear, calm and cooperative, gait stable, no focal neurological deficits, FAST negative.",
-  heent: "Eyes without redness or discharge, PERRLA, pupils 3mm with brisk reflex, eyes tracking. Ear canals bilaterally clear of cerumen and discharge, tympanic membranes pearly and non-bulging bilaterally, no perforation noted. Hearing grossly intact bilaterally. No rhinorrhea or epistaxis. Oropharynx without redness or exudate, no white patches, uvula midline, tonsils not enlarged. Trachea midline, neck supple with full ROM, no thyromegaly, no lymphadenopathy noted.",
-  respiratory: "Chest auscultated with good air entry to all lung fields bilaterally, no adventitious sounds. No cough, no increased work of breathing, no tachypnea.",
-  cardiovascular: "S1S2 heard, no murmurs. No tachycardia. Peripheral pulses strong and equal bilaterally, pedal pulses palpable and strong. No peripheral or generalized edema. Capillary refill less than 3 seconds.",
-  abdominal: "Abdomen flat, soft, non-tender to palpation. Active bowel sounds present in all four quadrants. No masses palpated, no rebound tenderness. No nausea, vomiting, or anorexia reported.",
-  genitourinary: "Denies dysuria, frequency, or urgency. No flank pain. Urine reported as yellow and clear. No genital discharge reported.",
-  musculoskeletal: "Full range of motion in all extremities. No weakness, swelling, or deformity noted.",
-  skin: "Skin warm, colour appropriate for ethnicity, no jaundice. No tenting. No skin breakdown, open lesions, or wounds noted.",
-  psych: "Euthymic mood, bright affect. No delusions or hallucinations reported. Denies suicidal ideation."
+  neuro:   "Alert and oriented x4, speech clear, calm and cooperative, gait stable, no focal neurological deficits, FAST negative.",
+  heent:   "Eyes without redness or discharge, PERRLA, pupils 3mm with brisk reflex, eyes tracking. Ear canals bilaterally clear of cerumen and discharge, tympanic membranes pearly and non-bulging bilaterally, no perforation noted. Hearing grossly intact bilaterally. No rhinorrhea or epistaxis. Oropharynx without redness or exudate, no white patches, uvula midline, tonsils not enlarged. Trachea midline, neck supple with full ROM, no thyromegaly, no lymphadenopathy noted.",
+  resp:    "Chest auscultated with good air entry to all lung fields bilaterally, no adventitious sounds. No cough, no increased work of breathing, no tachypnea.",
+  cardio:  "S1S2 heard, no murmurs. No tachycardia. Peripheral pulses strong and equal bilaterally, pedal pulses palpable and strong. No peripheral or generalized edema. Capillary refill less than 3 seconds.",
+  abdo:    "Abdomen flat, soft, non-tender to palpation. Active bowel sounds present in all four quadrants. No masses palpated, no rebound tenderness. No nausea, vomiting, or anorexia reported.",
+  gu:      "Denies dysuria, frequency, or urgency. No flank pain. Urine reported as yellow and clear. No genital discharge reported.",
+  msk:     "Full range of motion in all extremities. No weakness, swelling, or deformity noted.",
+  skin:    "Skin warm, colour appropriate for ethnicity, no jaundice. No tenting. No skin breakdown, open lesions, or wounds noted.",
+  psych:   "Euthymic mood, bright affect. No delusions or hallucinations reported. Denies suicidal ideation."
 };
 
-const SYSTEM_PROMPT = `You are a clinical documentation assistant for a Community Health Nurse (CHN) working in Nunavut. Convert raw clinical jot notes into a properly formatted SOAP note.
+const CHECKLIST_ADULT = [
+  "Interpreter present — y/n documented",
+  "Time of assessment documented",
+  "Chief complaint clear",
+  "Allergies documented or NKDA confirmed",
+  "Past medical history documented",
+  "Past surgical history documented",
+  "Substance use documented",
+  "Social history documented",
+  "Assessment / differential entered by clinician",
+  "Red flags considered and documented",
+  "Guidelines cited if applicable",
+  "Patient teaching documented",
+  "Return precautions documented",
+  "Patient response to plan documented",
+  "Dispo time documented",
+  "Follow-up date and time confirmed",
+  "Consult details complete — name, time, orders",
+  "Referrals entered in Meditech if applicable"
+];
 
-RULES:
-1. Generate all four sections: SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN.
-2. Formal clinical prose throughout. No bullet points anywhere.
-3. ASSESSMENT: Do not generate a diagnosis. Write exactly: "[Assessment — document your diagnosis/differential here]" then on the next line, if the nurse provided a differential, write: "As noted by clinician: [list their dx exactly as written]"
-4. OBJECTIVE: Always begin with: "Vitals taken and recorded in the appropriate flowsheet."
-5. Physical exam in objective: use nurse's findings where provided. For any system not mentioned or noted as no sx / normal, populate using the WNL baselines below verbatim. Document systems in this order: General impression, Neurological, HEENT, Respiratory, Cardiovascular, Abdominal, Genitourinary, Musculoskeletal, Skin/Integumentary, Mental status/Psychiatric.
-6. MISSING ELEMENTS: Insert inline prompts in square brackets exactly where the missing element belongs. Check for ALL of the following — do not skip any:
-   - Interpreter present (insert at very start of SUBJECTIVE)
-   - Time of assessment (insert in OBJECTIVE if not provided)
-   - Chief complaint (if unclear or absent)
-   - Allergies — if not mentioned, insert [Allergies — document or confirm NKDA] in the history section of SUBJECTIVE
-   - Past medical history — if not mentioned, insert [PMHx — document relevant history] in SUBJECTIVE
-   - Past surgical history — if not mentioned, insert [Surgical Hx — document or confirm none] in SUBJECTIVE
-   - Dispo time (insert at end of PLAN)
-   - Patient response to plan (insert at end of PLAN)
-   - Follow-up date and time (insert in PLAN if not provided)
-   - Patient teaching provided — what specifically was taught (insert in PLAN)
-   - Return precautions — what patient was told to watch for (insert in PLAN)
-7. Do not invent findings, medications, doses, or labs not mentioned. However, every clinical detail provided in the notes must appear somewhere in the generated note — redundancy is preferred over omission. If uncertain where a detail belongs, include it in the most logical section and also reference it where clinically relevant.
-8. Any interventions, medications administered, or treatments provided during the encounter must be documented within the objective section as part of the narrative flow, not appended at the end. Integrate them chronologically where they occurred — for example, naloxone administration belongs within the resuscitation narrative alongside the clinical response, not after the systems review.
-9. If a consult is noted, include physician name, time, and orders as documented.
-10. Output only the note. No preamble, no explanation.
-11. Format section labels as: SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN on their own lines in caps.
+const CHECKLIST_PAEDS = [
+  "Time of assessment documented",
+  "Chief complaint clear",
+  "Allergies documented or NKDA confirmed",
+  "Past medical history documented",
+  "Immunization status documented",
+  "Sick contacts / exposure history documented",
+  "Ins and outs — feeds and fluids documented",
+  "Assessment / differential entered by clinician",
+  "Red flags considered and documented",
+  "Guidelines cited if applicable",
+  "Education provided to family documented",
+  "Return precautions documented",
+  "Dispo time documented",
+  "Follow-up date and time confirmed",
+  "Consult details complete if applicable",
+  "Referrals entered in Meditech if applicable"
+];
 
-WNL BASELINES:
+const COMMON_RULES = `CRITICAL RULES — follow every one without exception:
+1. Never invent, infer, or hallucinate any clinical detail, finding, medication, dose, time, or result not explicitly present in the notes.
+2. Every clinical detail present in the notes MUST appear in the output. Redundancy is preferred over omission. If a detail fits more than one section, include it in all relevant places.
+3. For any standard SOAP element absent from the notes, insert an inline placeholder in square brackets stating what is missing, e.g. [Interpreter present — not mentioned, document y/n]. Placeholders must appear exactly where the element belongs in the note.
+4. Times are medico-legal audit points — always keep time placeholders if times are not mentioned. Never omit or estimate times.
+5. Output only the note text. No preamble, no explanation, no commentary.
+6. Format section labels on their own lines: SUBJECTIVE, OBJECTIVE, ASSESSMENT, PLAN.
+7. Write in formal clinical prose throughout. No bullet points anywhere in the note.
+8. Any medications administered, interventions performed, or treatments provided must be documented within the objective section narrative chronologically as they occurred — not appended at the end.
+9. Assessment section: never generate a diagnosis. Insert [Assessment — document your diagnosis/differential here]. If the clinician provided a differential, list it after as: As noted by clinician: [their exact words].
+10. Always include under assessment: [Red flags considered and ruled out — document].`;
+
+const ADULT_PROMPT = `You are a clinical documentation assistant for a Community Health Nurse (CHN) working in Nunavut. Convert raw clinical notes or Heidi transcript output into a properly structured SOAP note using the adult template below.
+
+${COMMON_RULES}
+
+ADULT TEMPLATE STRUCTURE:
+
+SUBJECTIVE
+[Interpreter present — document y/n]
+Document chief complaint and reason for visit. Then document history of presenting illness covering: onset, location, duration, character, alleviating and aggravating factors including self-treatment attempts and effectiveness, radiation, timing, severity. Previous episodes of similar symptoms including when they occurred, how managed, and outcomes. Progression of symptoms over time. Impact on daily activities and function. Associated symptoms both focal and systemic.
+PMHx: [past medical history or placeholder if not mentioned]
+PSHx: [past surgical history or placeholder if not mentioned]
+Allergies/Medications: [known allergies and current medications including OTC and supplements, or placeholder if not mentioned]
+SocHx: [living situation, occupation, relevant exposures, or placeholder if not mentioned]
+Substance use: [tobacco — type, amount, duration; alcohol — frequency and quantity; recreational or illicit drug use; or placeholder if not mentioned]
+Sexual history: [if relevant to presenting complaint — LMP, pregnancy status, sexual activity, contraception; or placeholder]
+Family history: [if relevant to presenting complaint; or placeholder]
+
+OBJECTIVE
+Time of assessment: [time or placeholder if not mentioned]
+Vitals taken and recorded in the appropriate flowsheet.
+Document physical exam findings. For focused assessment, document the primary system plus one above and one below. For systems not assessed or reported as normal or no symptoms, use the WNL baselines below verbatim. For systems with findings, integrate the findings into clinical prose modifying the WNL baseline where relevant. Document systems in this order: General impression, Neurological, HEENT, Respiratory, Cardiovascular, Abdominal, Genitourinary, Musculoskeletal, Skin and Integumentary, Mental status and Psychiatric.
+
+WNL baselines:
 General impression: ${WNL.general}
 Neurological: ${WNL.neuro}
 HEENT: ${WNL.heent}
-Respiratory: ${WNL.respiratory}
-Cardiovascular: ${WNL.cardiovascular}
-Abdominal: ${WNL.abdominal}
-Genitourinary: ${WNL.genitourinary}
-Musculoskeletal: ${WNL.musculoskeletal}
-Skin/Integumentary: ${WNL.skin}
-Mental status/Psychiatric: ${WNL.psych}`;
+Respiratory: ${WNL.resp}
+Cardiovascular: ${WNL.cardio}
+Abdominal: ${WNL.abdo}
+Genitourinary: ${WNL.gu}
+Musculoskeletal: ${WNL.msk}
+Skin and Integumentary: ${WNL.skin}
+Mental status and Psychiatric: ${WNL.psych}
+
+Weight: [kg or placeholder if not mentioned]
+Height: [cm or placeholder if not mentioned]
+Blood glucose: [mmol/L or placeholder if not measured]
+Laboratory and diagnostic results: [results or pending status, or placeholder if not mentioned]
+
+ASSESSMENT
+[Assessment — document your diagnosis/differential here]
+As noted by clinician: [list clinician's differential exactly if provided, or remove this line if none provided]
+[Red flags considered and ruled out — document]
+
+PLAN
+Bloodwork/imaging ordered [time]: [details or placeholder if not mentioned]
+Medications administered [time]: [name, dose, route, response or placeholder if not mentioned]
+Fluids administered: [type, amount, response or placeholder if not mentioned]
+Guidelines cited: [FNIHB guidelines, GN policies, protocols, directives cited or placeholder if not mentioned]
+Physician/specialist consulted [time]: [name, time, orders or placeholder if not mentioned]
+Consult reports reviewed: [details or placeholder if not mentioned]
+Patient education: [what was taught or placeholder if not mentioned]
+Patient handouts provided: [specify or placeholder if not mentioned]
+Follow-up: [date, time, instructions or placeholder if not mentioned]
+Return precautions: [what patient was told to watch for and when to call on-call or return or placeholder if not mentioned]
+Referrals entered in Meditech: [details or placeholder if not mentioned]
+Appointments made: [details or placeholder if not mentioned]
+Patient response to plan: [document or placeholder if not mentioned]
+Time patient left/admitted/medevac'd: [time or placeholder if not mentioned]`;
+
+const PAEDS_PROMPT = `You are a clinical documentation assistant for a Community Health Nurse (CHN) working in Nunavut. Convert raw clinical notes or Heidi transcript output into a properly structured SOAP note using the paediatric and infant template below.
+
+${COMMON_RULES}
+
+PAEDIATRIC TEMPLATE STRUCTURE:
+
+SUBJECTIVE
+Document chief complaint and reason for visit. Then document history of presenting illness covering: onset, location, duration, character, alleviating and aggravating factors, timing, severity. How easy is the child to console. Previous episodes including management and outcomes. Progression over time. Impact on normal child behaviours and activities. Associated symptoms including ear rubbing if mentioned.
+Ins/Outs: [diet — breastfed or formula fed; fluid intake; enthusiasm for eating and drinking; or placeholder if not mentioned]
+Sick contacts and exposure history: [known sick contacts or relevant exposures or placeholder if not mentioned]
+PMHx: [past medical history or placeholder if not mentioned]
+Allergies/Medications: [known allergies and current medications or placeholder if not mentioned]
+Immunizations: [immunization status — up to date, behind with details, or parents not immunizing; or placeholder if not mentioned]
+
+OBJECTIVE
+Time of assessment: [time or placeholder if not mentioned]
+General appearance: [activity level, interactiveness, respiratory effort, colour or placeholder if not mentioned]
+Weight: [kg or placeholder if not mentioned]
+Height: [cm or placeholder if not mentioned]
+Blood glucose: [mmol/L or placeholder if not measured]
+Vitals: BP — [mmHg or placeholder], HR — [b/min, note if crying or other activity affecting pulse, or placeholder], RR — [breaths/min or placeholder], O2 Sat — [percent on RA or on O2 with flow rate and mode of delivery, or placeholder], Temp — [degrees C and method of measurement, or placeholder]
+Head, Face, and Neck: [findings or placeholder if not assessed]
+EENT
+Eyes: [findings or placeholder if not assessed]
+Ears: [findings or placeholder if not assessed]
+Nose and Sinuses: [findings or placeholder if not assessed]
+Mouth and Throat: [findings or placeholder if not assessed]
+Thorax:
+Respiratory: [findings or placeholder if not assessed]
+Cardiac: [findings or placeholder if not assessed]
+Abdomen: [findings or placeholder if not assessed]
+Extremities and Musculoskeletal: [findings or placeholder if not assessed]
+Skin: [findings or placeholder if not assessed]
+Neurological: [findings or placeholder if not assessed]
+Laboratory and diagnostic results: [results or pending status, or placeholder if not mentioned]
+
+ASSESSMENT
+[Assessment — document your diagnosis/differential here]
+As noted by clinician: [list clinician's differential exactly if provided, or remove this line if none provided]
+[Red flags considered and ruled out — document]
+
+PLAN
+Bloodwork/imaging ordered [time]: [details or placeholder if not mentioned]
+Medications administered [time]: [name, dose, route, response or placeholder if not mentioned]
+Fluids administered (Pedialyte/IV/other): [type, amount, response and acceptance or placeholder if not mentioned]
+Guidelines cited: [FNIHB guidelines, GN policies, protocols, directives cited or placeholder if not mentioned]
+Physician/specialist consulted [time]: [name, time, orders or placeholder if not mentioned]
+Consult reports reviewed: [details or placeholder if not mentioned]
+Education provided to patient/family: [what was taught or placeholder if not mentioned]
+Patient handouts provided: [specify or placeholder if not mentioned]
+Follow-up: [date, time, instructions or placeholder if not mentioned]
+Return precautions: [what family was told to watch for and when to call on-call or return or placeholder if not mentioned]
+Referrals entered in Meditech: [details or placeholder if not mentioned]
+Appointments made: [details or placeholder if not mentioned]
+Time patient left/admitted/medevac'd: [time or placeholder if not mentioned]`;
 
 function checkKey() {
   const val = document.getElementById('apiKey').value.trim();
-  document.getElementById('keyDot').className = 'status-dot' + (val.startsWith('sk-ant-') ? ' ok' : '');
+  document.getElementById('keyDot').className = 'key-dot' + (val.startsWith('sk-ant-') ? ' ok' : '');
 }
 
-function toggleKey() {
+function toggleKey(btn) {
   const input = document.getElementById('apiKey');
-  const btn = event.target;
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.textContent = 'hide';
-  } else {
-    input.type = 'password';
-    btn.textContent = 'show';
-  }
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = 'hide'; }
+  else { input.type = 'password'; btn.textContent = 'show'; }
 }
 
 function clearAll() {
   document.getElementById('rawNotes').value = '';
   document.getElementById('outputSection').style.display = 'none';
-  resetChecks();
+  document.getElementById('checklistSection').style.display = 'none';
 }
 
 async function generateNote() {
   const apiKey = document.getElementById('apiKey').value.trim();
-  const raw = document.getElementById('rawNotes').value.trim();
+  const raw    = document.getElementById('rawNotes').value.trim();
+  const tpl    = document.querySelector('input[name="template"]:checked').value;
 
   if (!apiKey) { alert('Enter your Anthropic API key first.'); return; }
-  if (!raw) { alert('Enter clinical notes first.'); return; }
+  if (!raw)    { alert('Paste your clinical notes first.'); return; }
 
   const btn = document.getElementById('generateBtn');
   btn.disabled = true;
-  btn.textContent = 'Generating…';
+  btn.textContent = 'Generating\u2026';
 
   document.getElementById('outputSection').style.display = 'block';
+  document.getElementById('checklistSection').style.display = 'none';
+
   const box = document.getElementById('outputBox');
   box.className = 'output-box loading';
-  box.textContent = 'Writing note…';
+  box.textContent = 'Writing note\u2026';
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -444,21 +384,23 @@ async function generateNote() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 1500,
-        system: SYSTEM_PROMPT,
+        max_tokens: 2000,
+        system: tpl === 'adult' ? ADULT_PROMPT : PAEDS_PROMPT,
         messages: [{ role: 'user', content: 'Here are my clinical notes:\n\n' + raw }]
       })
     });
 
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || response.statusText);
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'HTTP ' + response.status);
     }
 
     const data = await response.json();
     const text = data.content?.map(b => b.text || '').join('') || 'No response received.';
     box.className = 'output-box';
     renderOutput(box, text);
+    buildChecklist(tpl);
+    document.getElementById('checklistSection').style.display = 'block';
 
   } catch (err) {
     box.className = 'output-box';
@@ -473,19 +415,18 @@ function renderOutput(box, text) {
   box.innerHTML = '';
   const lines = text.split('\n');
   lines.forEach((line, i) => {
-    const isSectionHeader = /^(SUBJECTIVE|OBJECTIVE|ASSESSMENT|PLAN)$/.test(line.trim());
-    if (isSectionHeader) {
-      if (i > 0) { box.appendChild(document.createElement('br')); }
+    const isHead = /^(SUBJECTIVE|OBJECTIVE|ASSESSMENT|PLAN)$/.test(line.trim());
+    if (isHead) {
+      if (i > 0) box.appendChild(document.createElement('br'));
       const span = document.createElement('span');
-      span.className = 'section-header';
+      span.className = 'section-head';
       span.textContent = line;
       box.appendChild(span);
     } else {
-      const parts = line.split(/(\[[^\]]+\])/g);
-      parts.forEach(part => {
+      line.split(/(\[[^\]]+\])/g).forEach(part => {
         if (part.startsWith('[') && part.endsWith(']')) {
           const span = document.createElement('span');
-          span.className = 'prompt';
+          span.className = 'prompt-tag';
           span.textContent = part;
           box.appendChild(span);
         } else {
@@ -493,54 +434,37 @@ function renderOutput(box, text) {
         }
       });
     }
-    if (i < lines.length - 1) { box.appendChild(document.createTextNode('\n')); }
+    if (i < lines.length - 1) box.appendChild(document.createTextNode('\n'));
   });
 }
 
-const CHECKLIST_ITEMS = [
-  "Interpreter present — y/n documented",
-  "Time of assessment documented",
-  "Chief complaint clear",
-  "Allergies documented or NKDA confirmed",
-  "Past medical history documented",
-  "Past surgical history documented or none confirmed",
-  "Assessment/differential entered",
-  "Patient teaching documented",
-  "Return precautions documented",
-  "Patient response to plan",
-  "Dispo time documented",
-  "Follow-up date and time confirmed",
-  "Consult details complete"
-];
-
-function buildChecklist() {
-  const container = document.getElementById('checklistItems');
-  CHECKLIST_ITEMS.forEach((item, i) => {
-    const label = document.createElement('label');
-    label.className = 'checklist-item';
-    label.innerHTML = `<input type="checkbox" id="chk${i}" onchange="toggleCheck(${i}, this)"> ${item}`;
-    container.appendChild(label);
+function buildChecklist(tpl) {
+  const items = tpl === 'adult' ? CHECKLIST_ADULT : CHECKLIST_PAEDS;
+  const grid  = document.getElementById('checklistGrid');
+  grid.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'checklist-item';
+    div.id = 'ci-' + i;
+    div.innerHTML = '<input type="checkbox" id="chk-' + i + '" onchange="toggleCheck(' + i + ')" /><label for="chk-' + i + '">' + item + '</label>';
+    grid.appendChild(div);
   });
 }
 
-function toggleCheck(i, cb) {
-  cb.parentElement.className = 'checklist-item' + (cb.checked ? ' checked' : '');
+function toggleCheck(i) {
+  const chk = document.getElementById('chk-' + i);
+  document.getElementById('ci-' + i).className = 'checklist-item' + (chk.checked ? ' checked' : '');
 }
 
-function resetChecks() {
-  CHECKLIST_ITEMS.forEach((_, i) => {
-    const cb = document.getElementById('chk' + i);
-    cb.checked = false;
-    cb.parentElement.className = 'checklist-item';
-  });
+function resetChecklist() {
+  document.querySelectorAll('.checklist-item input').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('.checklist-item').forEach(div => { div.className = 'checklist-item'; });
 }
-
-buildChecklist();
 
 function copyOutput() {
   const text = document.getElementById('outputBox').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
+    const btn = document.querySelector('.btn-copy');
     const orig = btn.textContent;
     btn.textContent = 'Copied';
     setTimeout(() => { btn.textContent = orig; }, 1500);
