@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOAP Note Generator</title>
+<title>SOAP Note Template </title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -102,10 +102,10 @@ textarea::placeholder { color: var(--text-faint); font-family: var(--ui); font-s
 
   <div class="header">
     <div class="header-top">
-      <h1>SOAP Note Generator</h1>
-      <span class="header-sub">Nunavut CHN</span>
+      <h1>SOAP Note Template</h1>
+      <span class="header-sub">Oxana CHN</span>
     </div>
-    <p>Paste raw clinical notes or Heidi output. Select template. All documented findings will be included — missing standard elements appear as <span style="color:var(--prompt);font-weight:600">[inline prompts]</span> to complete before copying into Meditech.</p>
+    <p>Paste raw clinical notes or transcript. Select template. All documented findings will be included — missing standard elements appear as <span style="color:var(--prompt);font-weight:600">[inline prompts]</span> to complete before copying into Meditech.</p>
   </div>
 
   <div class="api-row">
@@ -115,15 +115,15 @@ textarea::placeholder { color: var(--text-faint); font-family: var(--ui); font-s
     <span class="key-dot" id="keyDot"></span>
   </div>
 
-  <div class="field-label">Patient template</div>
+  <div class="field-label">Patient template <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-faint);font-size:11px;">— paediatric for age &lt;10, adult for age 10+</span></div>
   <div class="template-row">
     <div class="template-opt">
       <input type="radio" name="template" id="tpl-adult" value="adult" checked />
-      <label for="tpl-adult">&#129489; Adult</label>
+      <label for="tpl-adult">&#129489; Adult &amp; Adolescent (10+)</label>
     </div>
     <div class="template-opt">
       <input type="radio" name="template" id="tpl-paeds" value="paeds" />
-      <label for="tpl-paeds">&#128118; Paediatric / Infant</label>
+      <label for="tpl-paeds">&#128118; Paediatric / Infant (&lt;10)</label>
     </div>
   </div>
 
@@ -219,7 +219,8 @@ const COMMON_RULES = `CRITICAL RULES — follow every one without exception:
 7. Write in formal clinical prose throughout. No bullet points anywhere in the note.
 8. Any medications administered, interventions performed, or treatments provided must be documented within the objective section narrative chronologically as they occurred — not appended at the end.
 9. Assessment section: never generate a diagnosis. Insert [Assessment — document your diagnosis/differential here]. If the clinician provided a differential, list it after as: As noted by clinician: [their exact words].
-10. Always include under assessment: [Red flags considered and ruled out — document].`;
+10. Always include under assessment: [Red flags considered and ruled out — document].
+11. EVIDENCE-BASED REMINDERS: After the note, add a brief section titled "Clinical reminders:" listing any evidence-based actions, assessments, or considerations relevant to the presentation that are not documented in the notes. These are prompts to support clinical decision-making, not diagnoses. Examples: relevant physical exam manoeuvres not documented, standard investigations for the presentation, guideline-recommended follow-up intervals, red flags not explicitly ruled out. Keep reminders concise and specific.`;
 
 const ADULT_PROMPT = `You are a clinical documentation assistant for a Community Health Nurse (CHN) working in Nunavut. Convert raw clinical notes or Heidi transcript output into a properly structured SOAP note using the adult template below.
 
